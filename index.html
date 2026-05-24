@@ -6,34 +6,38 @@
     <title>Тест: Базові функції та їхні графіки</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
-        h1 { color: #1a73e8; font-size: 24px; margin-bottom: 20px; }
-        canvas { background: #fafafa; border: 1px solid #ddd; border-radius: 8px; margin: 20px 0; }
-        .btn { background: #1a73e8; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; width: 100%; font-weight: bold; }
+        .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; min-height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        h1 { color: #1a73e8; font-size: 24px; margin-bottom: 20px; margin-top: 0; }
+        canvas { background: #fafafa; border: 1px solid #ddd; border-radius: 8px; margin: 20px 0; max-width: 100%; }
+        .btn { background: #1a73e8; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; width: 100%; font-weight: bold; box-sizing: border-box; }
         .btn:hover { background: #1557b0; }
-        .answer-section { margin-top: 20px; display: none; background: #e8f0fe; padding: 15px; border-radius: 8px; border-left: 5px solid #1a73e8; }
+        .answer-section { margin-top: 20px; display: none; background: #e8f0fe; padding: 15px; border-radius: 8px; border-left: 5px solid #1a73e8; width: 100%; box-sizing: border-box; }
         .formula { font-size: 22px; font-weight: bold; color: #111; margin: 5px 0; }
         .name { font-size: 16px; color: #555; }
-        .choice-btns { display: flex; gap: 10px; margin-top: 15px; display: none; }
+        .choice-btns { display: none; gap: 10px; margin-top: 15px; width: 100%; }
         .btn-yes { background: #28a745; }
         .btn-yes:hover { background: #218838; }
         .btn-no { background: #dc3545; }
         .btn-no:hover { background: #c82333; }
         .progress { color: #666; font-size: 14px; margin-bottom: 10px; }
         .result-score { font-size: 48px; font-weight: bold; color: #1a73e8; margin: 20px 0; }
+        p { color: #333; font-size: 16px; line-height: 1.5; }
     </style>
 </head>
 <body>
 
 <div class="card" id="quiz-card">
+    <h1>Тренажер графіків функцій</h1>
+    <p>Подивись на графік, згадай його математичну формулу та перевір себе!</p>
+    <button class="btn" onclick="startQuiz()">Почати тест</button>
 </div>
 
 <script>
 const functions = [
-    { name: "Лінійна функція (Пряма)", formula: "y = x", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, h/2); ctx.lineTo(w/2, -h/2); } },
+    { name: "Лінійна функція (Пняма)", formula: "y = x", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, h/2); ctx.lineTo(w/2, -h/2); } },
     { name: "Стала функція (Горизонтальна пряма)", formula: "y = 2", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, -2*s); ctx.lineTo(w/2, -2*s); } },
-    { name: "Квадратична функція (Парабола)", formula: "y = x²", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(x/s, 2)*s); } },
-    { name: "Кубічна функція (Кубічна парабола)", formula: "y = x³", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(x/s, 3)*s); } },
+    { name: "Квадратична функція (Парабола)", formula: "y = x²", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(x/s,2)*s); } },
+    { name: "Кубічна функція (Кубічна парабола)", formula: "y = x³", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(x/s,3)*s); } },
     { name: "Функція модуля", formula: "y = |x|", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, -w/2); ctx.lineTo(0,0); ctx.lineTo(w/2, -w/2); } },
     { name: "Функція квадратного кореня", formula: "y = √x", draw: (ctx, w, h, s) => { for(let x=0; x<=w/2; x++) ctx.lineTo(x, -Math.sqrt(x/s)*s); } },
     { name: "Обернена пропорційність (Гіпербола, k > 0)", formula: "y = 1/x", draw: (ctx, w, h, s) => { 
@@ -47,11 +51,6 @@ const functions = [
     { name: "Показникова функція (Зростаюча, a > 1)", formula: "y = 2ˣ", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(2, x/s)*s); } },
     { name: "Показникова функція (Спадна, 0 < a < 1)", formula: "y = (1/2)ˣ", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(0.5, x/s)*s); } },
     { name: "Логарифмічна функція (Зростаюча, a > 1)", formula: "y = log₂(x)", draw: (ctx, w, h, s) => { for(let x=1; x<=w/2; x++) ctx.lineTo(x, -(Math.log2(x/s))*s); } },
-    { name: "Логарифмічна функція (Спадна, 0 < a < 1)", formula: "y = log₀.₅(x)", draw: (ctx, w, h, s) => { for(let x=1; x<=w/2; x++) ctx.lineTo(x, -(Math.log(x/s) / Math.log(0.5))*s); } },
+    { name: "Логарифмічна функція (Спадна, 0 < a < 1)", formula: "y = log₀.₅(x)", draw: (ctx, w, h, s) => { for(let x=1; x<=w/2; x++) ctx.lineTo(x, -(Math.log(x/s)/Math.log(0.5))*s); } },
     { name: "Тригонометричний синус", formula: "y = sin(x)", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.sin(x/(s/1.5))*(s*1.5)); } },
-    { name: "Тригонометричний косинус", formula: "y = cos(x)", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.cos(x/(s/1.5))*(s*1.5)); } },
-    { name: "Тригонометричний тангенс", formula: "y = tg(x)", draw: (ctx, w, h, s) => { 
-        let step = 1;
-        for (let x = -w/2; x <= w/2; x += step) {
-            let rad = x / (s * 1.2);
-            let yVal = -Math.tan(rad) * (s *
+    { name: "Тригонометричний косинус", formula: "y = cos(x)", draw: (ctx, w, h, s) => { for(let x=-w/2;
