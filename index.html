@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест: Базові функції та їхні графіки</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        h1 { color: #1a73e8; font-size: 24px; margin-bottom: 20px; }
+        canvas { background: #fafafa; border: 1px solid #ddd; border-radius: 8px; margin: 20px 0; }
+        .btn { background: #1a73e8; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; width: 100%; font-weight: bold; }
+        .btn:hover { background: #1557b0; }
+        .answer-section { margin-top: 20px; display: none; background: #e8f0fe; padding: 15px; border-radius: 8px; border-left: 5px solid #1a73e8; }
+        .formula { font-size: 22px; font-weight: bold; color: #111; margin: 5px 0; }
+        .name { font-size: 16px; color: #555; }
+        .choice-btns { display: flex; gap: 10px; margin-top: 15px; display: none; }
+        .btn-yes { background: #28a745; }
+        .btn-yes:hover { background: #218838; }
+        .btn-no { background: #dc3545; }
+        .btn-no:hover { background: #c82333; }
+        .progress { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .result-score { font-size: 48px; font-weight: bold; color: #1a73e8; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="card" id="quiz-card">
+    <!-- Екрани будуть змінюватися динамічно через JS -->
+</div>
+
+<script>
+const functions = [
+    { name: "Лінійна функція (Пряма)", formula: "y = x", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, h/2); ctx.lineTo(w/2, -h/2); } },
+    { name: "Квадратична функція (Парабола)", formula: "y = x²", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(x/s, 2)*s); } },
+    { name: "Кубічна функція (Кубічна парабола)", formula: "y = x³", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(x/s, 3)*s); } },
+    { name: "Функція модуля", formula: "y = |x|", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, -w/2); ctx.lineTo(0,0); ctx.lineTo(w/2, -w/2); } },
+    { name: "Обернена пропорційність (Гіпербола)", formula: "y = 1/x", draw: (ctx, w, h, s) => { 
+        for(let x=-w/2; x<-1; x++) ctx.lineTo(x, -(1/(x/s))*s); ctx.stroke(); ctx.beginPath();
+        for(let x=1; x<=w/2; x++) ctx.lineTo(x, -(1/(x/s))*s);
+    }},
+    { name: "Функція квадратного кореня", formula: "y = √x", draw: (ctx, w, h, s) => { for(let x=0; x<=w/2; x++) ctx.lineTo(x, -Math.sqrt(x/s)*s); } },
+    { name: "Тригонометричний синус", formula: "y = sin(x)", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.sin(x/(s/1.5))*(s*1.5)); } },
+    { name: "Тригонометричний косинус", formula: "y = cos(x)", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.cos(x/(s/1.5))*(s*1.5)); } }
+];
+
+let currentIndex = -1; 
+let score = 0;
+
+function showScreen(html) { document.getElementById('quiz-card').innerHTML = html; }
+
+function startQuiz() { currentIndex = 0; score = 0; loadQuestion(); }
+
+function loadQuestion() {
+    if(currentIndex >= functions.length) { showResults(); return; }
+    const f = functions[currentIndex];
+    showScreen(`
+        <div class="progress">Картка ${currentIndex + 1} з ${functions.length}</div>
+        <h1>Яка це функція?</h1>
+        <canvas id="graphCanvas" width="350" height="250"></canvas>
+        <button class="btn" id="show-btn" onclick="revealAnswer()">Показати відповідь</button>
+        <div class="answer-section" id="answer">
+            <div class="formula">${f.formula}</div>
+            <div class="name">${f.name}</div>
+        </div>
+        <div class="choice-btns" id="choices">
+            <button class="btn btn-no" onclick="nextQuestion(false)">Не пам'ятаю</button>
+            <button class="btn btn-yes" onclick="nextQuestion(true)">Пам'ятаю</button>
+        </div>
+    `);
+    drawGraph(f.draw);
+}
+
+function drawGraph(drawFn) {
+    const canvas = document.getElementById('graphCanvas'); if(!canvas) return;
+    const ctx = canvas.getContext('2d'); const w = canvas.width; const h = canvas.height; const scale = 30;
+    ctx.clearRect(0,0,w,h); ctx.save(); ctx.translate(w/2, h/2);
+    ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1;
+    for(let i=-w/2; i<w/2; i+=scale) { ctx.beginPath(); ctx.moveTo(i,-h/2); ctx.lineTo(i,h/2); ctx.stroke(); }
+    for(let i=-h/2; i<h/2; i+=scale) { ctx.beginPath(); ctx.moveTo(-w/2,i); ctx.lineTo(w/2,i); ctx.stroke(); }
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-w/2,0); ctx.lineTo(w/2,0); ctx.moveTo(0,-h/2); ctx.lineTo(0,h/2); ctx.stroke();
+    ctx.strokeStyle = '#ff3b30'; ctx.lineWidth = 3; ctx.beginPath(); drawFn(ctx, w, h, scale); ctx.stroke(); ctx.restore();
+}
+
+function revealAnswer() {
+    document.getElementById('show-btn').style.display = 'none';
+    document.getElementById('answer').style.display = 'block';
+    document.getElementById('choices').style.display = 'flex';
+}
+
+function nextQuestion(remembered) {
+    if(remembered) score++;
+    currentIndex++; loadQuestion();
+}
+
+function showResults() {
+    let msg = score === functions.length ? "Чудова пам'ять! Ви знаєте всі графіки!" : "Гарний результат! Продовжуйте тренування.";
+    showScreen(`
+        <h1>Тест завершено!</h1>
+        <div class="name">Ваш результат тренування:</div>
+        <div class="result-score">${score} з ${functions.length}</div>
+        <p>${msg}</p>
+        <button class="btn" onclick="startQuiz()">Пройти знову</button>
+    `);
+}
+
+showScreen(`
+    <h1>Тренажер графіків функцій</h1>
+    <p>Подивіться на графік, згадайте формулу та перевірте себе.</p>
+    <button class="btn" onclick="startQuiz()">Почати тест</button>
+`);
+</script>
+</body>
+</html>
