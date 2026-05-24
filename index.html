@@ -26,30 +26,74 @@
 <body>
 
 <div class="card" id="quiz-card">
-    <!-- Екрани будуть змінюватися динамічно через JS -->
-</div>
+    </div>
 
 <script>
 const functions = [
     { name: "Лінійна функція (Пряма)", formula: "y = x", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, h/2); ctx.lineTo(w/2, -h/2); } },
+    { name: "Стала функція (Горизонтальна пряма)", formula: "y = 2", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, -2*s); ctx.lineTo(w/2, -2*s); } },
     { name: "Квадратична функція (Парабола)", formula: "y = x²", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(x/s, 2)*s); } },
     { name: "Кубічна функція (Кубічна парабола)", formula: "y = x³", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(x/s, 3)*s); } },
     { name: "Функція модуля", formula: "y = |x|", draw: (ctx, w, h, s) => { ctx.moveTo(-w/2, -w/2); ctx.lineTo(0,0); ctx.lineTo(w/2, -w/2); } },
-    { name: "Обернена пропорційність (Гіпербола)", formula: "y = 1/x", draw: (ctx, w, h, s) => { 
-        for(let x=-w/2; x<-1; x++) ctx.lineTo(x, -(1/(x/s))*s); ctx.stroke(); ctx.beginPath();
-        for(let x=1; x<=w/2; x++) ctx.lineTo(x, -(1/(x/s))*s);
-    }},
     { name: "Функція квадратного кореня", formula: "y = √x", draw: (ctx, w, h, s) => { for(let x=0; x<=w/2; x++) ctx.lineTo(x, -Math.sqrt(x/s)*s); } },
+    { name: "Обернена пропорційність (Гіпербола, k > 0)", formula: "y = 1/x", draw: (ctx, w, h, s) => { 
+        ctx.beginPath(); for(let x=-w/2; x<-2; x++) ctx.lineTo(x, -(1/(x/s))*s); ctx.stroke(); 
+        ctx.beginPath(); for(let x=2; x<=w/2; x++) ctx.lineTo(x, -(1/(x/s))*s);
+    }},
+    { name: "Обернена пропорційність (Гіпербола, k < 0)", formula: "y = -1/x", draw: (ctx, w, h, s) => { 
+        ctx.beginPath(); for(let x=-w/2; x<-2; x++) ctx.lineTo(x, -(-1/(x/s))*s); ctx.stroke(); 
+        ctx.beginPath(); for(let x=2; x<=w/2; x++) ctx.lineTo(x, -(-1/(x/s))*s);
+    }},
+    { name: "Показникова функція (Зростаюча, a > 1)", formula: "y = 2ⁿ (2ˣ)", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(2, x/s)*s); } },
+    { name: "Показникова функція (Спадна, 0 < a < 1)", formula: "y = (1/2)ˣ", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.pow(0.5, x/s)*s); } },
+    { name: "Логарифмічна функція (Зростаюча, a > 1)", formula: "y = log₂(x)", draw: (ctx, w, h, s) => { for(let x=1; x<=w/2; x++) ctx.lineTo(x, -(Math.log2(x/s))*s); } },
+    { name: "Логарифмічна функція (Спадна, 0 < a < 1)", formula: "y = log(1/2)(x)", draw: (ctx, w, h, s) => { for(let x=1; x<=w/2; x++) ctx.lineTo(x, -(Math.log0.5(x/s))*s); } },
     { name: "Тригонометричний синус", formula: "y = sin(x)", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.sin(x/(s/1.5))*(s*1.5)); } },
-    { name: "Тригонометричний косинус", formula: "y = cos(x)", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.cos(x/(s/1.5))*(s*1.5)); } }
+    { name: "Тригонометричний косинус", formula: "y = cos(x)", draw: (ctx, w, h, s) => { for(let x=-w/2; x<=w/2; x++) ctx.lineTo(x, -Math.cos(x/(s/1.5))*(s*1.5)); } },
+    { name: "Тригонометричний тангенс", formula: "y = tg(x)", draw: (ctx, w, h, s) => { 
+        let step = 1;
+        for (let x = -w/2; x <= w/2; x += step) {
+            let rad = x / (s * 1.2);
+            let yVal = -Math.tan(rad) * (s * 1.2);
+            if (Math.abs(Math.tan(rad)) < 5) {
+                if (x === -w/2 || Math.abs(Math.tan((x-step)/(s*1.2))) >= 5) ctx.beginPath();
+                ctx.lineTo(x, yVal);
+            } else { ctx.stroke(); ctx.beginPath(); }
+        }
+    }},
+    { name: "Тригонометричний котангенс", formula: "y = ctg(x)", draw: (ctx, w, h, s) => { 
+        let step = 1;
+        for (let x = -w/2; x <= w/2; x += step) {
+            let rad = x / (s * 1.2);
+            let cot = 1 / Math.tan(rad);
+            let yVal = -cot * (s * 1.2);
+            if (Math.abs(cot) < 5) {
+                if (x === -w/2 || Math.abs(1/Math.tan((x-step)/(s*1.2))) >= 5) ctx.beginPath();
+                ctx.lineTo(x, yVal);
+            } else { ctx.stroke(); ctx.beginPath(); }
+        }
+    }}
 ];
+
+// Перемішування карток, щоб тест щоразу був у випадковому порядку
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
 
 let currentIndex = -1; 
 let score = 0;
 
 function showScreen(html) { document.getElementById('quiz-card').innerHTML = html; }
 
-function startQuiz() { currentIndex = 0; score = 0; loadQuestion(); }
+function startQuiz() { 
+    currentIndex = 0; 
+    score = 0; 
+    shuffle(functions);
+    loadQuestion(); 
+}
 
 function loadQuestion() {
     if(currentIndex >= functions.length) { showResults(); return; }
@@ -75,11 +119,11 @@ function drawGraph(drawFn) {
     const canvas = document.getElementById('graphCanvas'); if(!canvas) return;
     const ctx = canvas.getContext('2d'); const w = canvas.width; const h = canvas.height; const scale = 30;
     ctx.clearRect(0,0,w,h); ctx.save(); ctx.translate(w/2, h/2);
-    ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#eee'; ctx.lineWidth = 1;
     for(let i=-w/2; i<w/2; i+=scale) { ctx.beginPath(); ctx.moveTo(i,-h/2); ctx.lineTo(i,h/2); ctx.stroke(); }
     for(let i=-h/2; i<h/2; i+=scale) { ctx.beginPath(); ctx.moveTo(-w/2,i); ctx.lineTo(w/2,i); ctx.stroke(); }
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-w/2,0); ctx.lineTo(w/2,0); ctx.moveTo(0,-h/2); ctx.lineTo(0,h/2); ctx.stroke();
-    ctx.strokeStyle = '#ff3b30'; ctx.lineWidth = 3; ctx.beginPath(); drawFn(ctx, w, h, scale); ctx.stroke(); ctx.restore();
+    ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-w/2,0); ctx.lineTo(w/2,0); ctx.moveTo(0,-h/2); ctx.lineTo(0,h/2); ctx.stroke();
+    ctx.strokeStyle = '#1a73e8'; ctx.lineWidth = 2.5; ctx.beginPath(); drawFn(ctx, w, h, scale); ctx.stroke(); ctx.restore();
 }
 
 function revealAnswer() {
@@ -94,19 +138,25 @@ function nextQuestion(remembered) {
 }
 
 function showResults() {
-    let msg = score === functions.length ? "Чудова пам'ять! Ви знаєте всі графіки!" : "Гарний результат! Продовжуйте тренування.";
+    let percent = Math.round((score / functions.length) * 100);
+    let msg = "";
+    if(percent === 100) msg = "Неймовірно! Ідеальний результат!";
+    else if(percent >= 75) msg = "Чудові знання графіків!";
+    else if(percent >= 50) msg = "Хороший результат, але варто ще потренуватися.";
+    else msg = "Треба ще повторити матеріал. Спробуй ще раз!";
+
     showScreen(`
         <h1>Тест завершено!</h1>
-        <div class="name">Ваш результат тренування:</div>
+        <div class="name">Твій результат самоперевірки:</div>
         <div class="result-score">${score} з ${functions.length}</div>
-        <p>${msg}</p>
+        <p><strong>${msg}</strong></p>
         <button class="btn" onclick="startQuiz()">Пройти знову</button>
     `);
 }
 
 showScreen(`
     <h1>Тренажер графіків функцій</h1>
-    <p>Подивіться на графік, згадайте формулу та перевірте себе.</p>
+    <p>Подивись на графік, згадай його математичну формулу та перевір себе!</p>
     <button class="btn" onclick="startQuiz()">Почати тест</button>
 `);
 </script>
